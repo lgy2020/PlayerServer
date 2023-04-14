@@ -1,10 +1,10 @@
 ﻿#include "Logger.h"
 #include "Process.h"
-
+#include "ThreadPool.h"
 
 int CreateLogServer(CProcess* proc)
 {
-	printf("%s(%d):<%s> pid=%d\n", __FILE__, __LINE__, __FUNCTION__, getpid());
+	//printf("%s(%d):<%s> pid=%d\n", __FILE__, __LINE__, __FUNCTION__, getpid());
 	CLoggerServer server;
 	int ret = server.Start();
 	if (ret != 0) {
@@ -24,27 +24,27 @@ int CreateLogServer(CProcess* proc)
 
 int CreateClientServer(CProcess* proc)
 {
-	printf("%s(%d):<%s> pid=%d\n", __FILE__, __LINE__, __FUNCTION__, getpid());
+	//printf("%s(%d):<%s> pid=%d\n", __FILE__, __LINE__, __FUNCTION__, getpid());
 	int fd = -1;
 	int ret = proc->RecvFD(fd);
 	printf("%s(%d):<%s> ret=%d\n", __FILE__, __LINE__, __FUNCTION__, ret);
-	printf("%s(%d):<%s> fd=%d\n", __FILE__, __LINE__, __FUNCTION__, fd);
+	//printf("%s(%d):<%s> fd=%d\n", __FILE__, __LINE__, __FUNCTION__, fd);
 	sleep(1);
 	char buf[10] = "";
 	lseek(fd, 0, SEEK_SET);
 	read(fd, buf, sizeof(buf));
-	printf("%s(%d):<%s> buf=%s\n", __FILE__, __LINE__, __FUNCTION__, buf);
+	//printf("%s(%d):<%s> buf=%s\n", __FILE__, __LINE__, __FUNCTION__, buf);
 	close(fd);
 	return 0;
 }
 
 int LogTest()
 {
-	char buffer[] = "hello world! ";
+	char buffer[] = "hello edoyun! 冯老师";
 	usleep(1000 * 100);
-	TRACEI("here is log %d %c %f %g %s ", 10, 'A', 1.0f, 2.0, buffer);
+	TRACEI("here is log %d %c %f %g %s 哈哈 嘻嘻 易道云", 10, 'A', 1.0f, 2.0, buffer);
 	DUMPD((void*)buffer, (size_t)sizeof(buffer));
-	LOGE << 100 << " " << 'S' << " " << 0.12345f << " " << 1.23456789 << " " << buffer << " wodebiancheng";
+	LOGE << 100 << " " << 'S' << " " << 0.12345f << " " << 1.23456789 << " " << buffer << " 易道云编程";
 	return 0;
 }
 
@@ -59,7 +59,7 @@ int main()
 		printf("%s(%d):<%s> pid=%d\n", __FILE__, __LINE__, __FUNCTION__, getpid());
 		return -1;
 	}
-	//LogTest();
+	LogTest();
 	printf("%s(%d):<%s> pid=%d\n", __FILE__, __LINE__, __FUNCTION__, getpid());
 	CThread thread(LogTest);
 	thread.Start();
@@ -79,6 +79,24 @@ int main()
 	if (ret != 0)printf("errno:%d msg:%s\n", errno, strerror(errno));
 	write(fd, "edoyun", 6);
 	close(fd);
+	CThreadPool pool;
+	ret = pool.Start(4);
+	printf("%s(%d):<%s> ret=%d\n", __FILE__, __LINE__, __FUNCTION__, ret);
+	if (ret != 0)printf("errno:%d msg:%s\n", errno, strerror(errno));
+	ret = pool.AddTask(LogTest);
+	printf("%s(%d):<%s> ret=%d\n", __FILE__, __LINE__, __FUNCTION__, ret);
+	if (ret != 0)printf("errno:%d msg:%s\n", errno, strerror(errno));
+	ret = pool.AddTask(LogTest);
+	printf("%s(%d):<%s> ret=%d\n", __FILE__, __LINE__, __FUNCTION__, ret);
+	if (ret != 0)printf("errno:%d msg:%s\n", errno, strerror(errno));
+	ret = pool.AddTask(LogTest);
+	printf("%s(%d):<%s> ret=%d\n", __FILE__, __LINE__, __FUNCTION__, ret);
+	if (ret != 0)printf("errno:%d msg:%s\n", errno, strerror(errno));
+	ret = pool.AddTask(LogTest);
+	printf("%s(%d):<%s> ret=%d\n", __FILE__, __LINE__, __FUNCTION__, ret);
+	if (ret != 0)printf("errno:%d msg:%s\n", errno, strerror(errno));
+	(void)getchar();
+	pool.Close();
 	proclog.SendFD(-1);
 	(void)getchar();
 	return 0;
